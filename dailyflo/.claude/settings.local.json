@@ -1,0 +1,20 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(npm run build:*)",
+      "Bash(vite build)",
+      "Bash(claude mcp add:*)",
+      "Bash(npm run dev:*)",
+      "Bash(claude mcp:*)",
+      "Bash(env)",
+      "Read(//Users/jbowden/.config/**)",
+      "Read(//Users/jbowden/Library/Application Support/Claude/**)",
+      "Read(//Users/jbowden/Library/**)",
+      "Read(//Users/jbowden/**)",
+      "Bash(cat:*)",
+      "Bash(git init)"
+    ],
+    "deny": [],
+    "ask": []
+  }
+}

@@ -1,0 +1,67 @@
+<svg width="500" height="400" viewBox="0 0 500 400" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <!-- Background gradient -->
+  <defs>
+    <linearGradient id="bgGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#f0f9ff;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#ecfdf5;stop-opacity:1" />
+    </linearGradient>
+    <linearGradient id="cardGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#ffffff;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#f8fafc;stop-opacity:1" />
+    </linearGradient>
+    <linearGradient id="progressGradient" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%" style="stop-color:#3b82f6;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#10b981;stop-opacity:1" />
+    </linearGradient>
+  </defs>
+
+  <!-- Background -->
+  <rect width="500" height="400" fill="url(#bgGradient)" rx="20"/>
+
+  <!-- Dashboard mockup -->
+  <rect x="50" y="50" width="400" height="300" fill="url(#cardGradient)" rx="12" stroke="#e2e8f0" stroke-width="1"/>
+
+  <!-- Header -->
+  <rect x="70" y="70" width="360" height="40" fill="#ffffff" rx="8"/>
+  <text x="85" y="90" fill="#1e293b" font-family="Arial, sans-serif" font-size="16" font-weight="bold">HabitFlow Dashboard</text>
+
+  <!-- Stats cards -->
+  <rect x="70" y="130" width="80" height="60" fill="#ffffff" rx="8" stroke="#e2e8f0"/>
+  <text x="110" y="155" fill="#3b82f6" font-family="Arial, sans-serif" font-size="18" font-weight="bold" text-anchor="middle">5</text>
+  <text x="110" y="175" fill="#64748b" font-family="Arial, sans-serif" font-size="10" text-anchor="middle">Habits</text>
+
+  <rect x="170" y="130" width="80" height="60" fill="#ffffff" rx="8" stroke="#e2e8f0"/>
+  <text x="210" y="155" fill="#10b981" font-family="Arial, sans-serif" font-size="18" font-weight="bold" text-anchor="middle">3</text>
+  <text x="210" y="175" fill="#64748b" font-family="Arial, sans-serif" font-size="10" text-anchor="middle">Done</text>
+
+  <rect x="270" y="130" width="80" height="60" fill="#ffffff" rx="8" stroke="#e2e8f0"/>
+  <text x="310" y="155" fill="#f59e0b" font-family="Arial, sans-serif" font-size="18" font-weight="bold" text-anchor="middle">12</text>
+  <text x="310" y="175" fill="#64748b" font-family="Arial, sans-serif" font-size="10" text-anchor="middle">Streak</text>
+
+  <rect x="370" y="130" width="80" height="60" fill="#ffffff" rx="8" stroke="#e2e8f0"/>
+  <text x="410" y="155" fill="#8b5cf6" font-family="Arial, sans-serif" font-size="18" font-weight="bold" text-anchor="middle">85%</text>
+  <text x="410" y="175" fill="#64748b" font-family="Arial, sans-serif" font-size="10" text-anchor="middle">Rate</text>
+
+  <!-- Habit cards -->
+  <rect x="70" y="210" width="170" height="80" fill="#ffffff" rx="8" stroke="#e2e8f0"/>
+  <text x="85" y="230" fill="#1e293b" font-family="Arial, sans-serif" font-size="12" font-weight="bold">💧 Drink Water</text>
+  <rect x="85" y="240" width="140" height="4" fill="#e2e8f0" rx="2"/>
+  <rect x="85" y="240" width="105" height="4" fill="url(#progressGradient)" rx="2"/>
+  <circle cx="210" cy="270" r="12" fill="#10b981"/>
+  <text x="210" y="275" fill="white" font-family="Arial, sans-serif" font-size="12" text-anchor="middle">✓</text>
+
+  <rect x="260" y="210" width="170" height="80" fill="#ffffff" rx="8" stroke="#e2e8f0"/>
+  <text x="275" y="230" fill="#1e293b" font-family="Arial, sans-serif" font-size="12" font-weight="bold">🏃‍♂️ Morning Run</text>
+  <rect x="275" y="240" width="140" height="4" fill="#e2e8f0" rx="2"/>
+  <rect x="275" y="240" width="84" height="4" fill="url(#progressGradient)" rx="2"/>
+  <circle cx="400" cy="270" r="12" fill="#e2e8f0"/>
+
+  <!-- Floating elements for visual appeal -->
+  <circle cx="420" cy="90" r="3" fill="#3b82f6" opacity="0.3"/>
+  <circle cx="450" cy="120" r="2" fill="#10b981" opacity="0.4"/>
+  <circle cx="390" cy="110" r="4" fill="#f59e0b" opacity="0.3"/>
+
+  <!-- Streak indicators -->
+  <rect x="330" y="310" width="100" height="30" fill="#ecfdf5" rx="15" stroke="#10b981" stroke-width="1"/>
+  <text x="380" y="330" fill="#10b981" font-family="Arial, sans-serif" font-size="12" font-weight="bold" text-anchor="middle">🔥 12 Day Streak</text>
+</svg>
