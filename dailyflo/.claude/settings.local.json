@@ -12,7 +12,11 @@
       "Read(//Users/jbowden/Library/**)",
       "Read(//Users/jbowden/**)",
       "Bash(cat:*)",
-      "Bash(git init)"
+      "Bash(git init)",
+      "Bash(gh auth login:*)",
+      "Bash(brew install:*)",
+      "Bash(git remote set-url:*)",
+      "Bash(git push:*)"
     ],
     "deny": [],
     "ask": []
