@@ -1,14 +1,8 @@
 import {
   Box,
-  IconButton,
-  Menu,
-  MenuItem,
-  Avatar,
-  Typography
+  IconButton
 } from '@mui/material'
 import { useNavigate, useLocation } from 'react-router-dom'
-import { useState } from 'react'
-import { useAuth } from '../contexts/AuthContext'
 import calendarIcon from '../assets/calendar.svg'
 import journalIcon from '../assets/journal.svg'
 import partnerIcon from '../assets/partner.svg'
@@ -17,25 +11,6 @@ import pauseIcon from '../assets/pause.svg'
 const Navbar = () => {
   const navigate = useNavigate()
   const location = useLocation()
-  const { user, signOut } = useAuth()
-  const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null)
-
-  const handleProfileClick = (event: React.MouseEvent<HTMLElement>) => {
-    setAnchorEl(event.currentTarget)
-  }
-
-  const handleClose = () => {
-    setAnchorEl(null)
-  }
-
-  const handleSignOut = async () => {
-    try {
-      await signOut()
-      handleClose()
-    } catch (error) {
-      console.error('Error signing out:', error)
-    }
-  }
 
   return (
     <Box
@@ -104,7 +79,7 @@ const Navbar = () => {
       {/* Spacer for center FAB */}
       <Box sx={{ width: 56 }} />
 
-      {/* Profile Icon */}
+      {/* Partner Icon */}
       <Box sx={{ position: 'relative', display: 'flex', alignItems: 'center', height: '100%' }}>
         <IconButton
           onClick={() => navigate('/partner')}
@@ -128,65 +103,7 @@ const Navbar = () => {
         )}
       </Box>
 
-      {/* User Profile Menu */}
-      <Box sx={{ position: 'relative', display: 'flex', alignItems: 'center', height: '100%' }}>
-        <IconButton
-          onClick={handleProfileClick}
-          sx={{
-            '&:hover': { opacity: 0.7 }
-          }}
-        >
-          <Avatar
-            src={user?.photoURL || undefined}
-            sx={{
-              width: 32,
-              height: 32,
-              backgroundColor: '#88C9B3',
-              fontSize: '0.875rem'
-            }}
-          >
-            {user?.displayName?.charAt(0) || 'U'}
-          </Avatar>
-        </IconButton>
-        
-        <Menu
-          anchorEl={anchorEl}
-          open={Boolean(anchorEl)}
-          onClose={handleClose}
-          anchorOrigin={{
-            vertical: 'top',
-            horizontal: 'right',
-          }}
-          transformOrigin={{
-            vertical: 'bottom',
-            horizontal: 'right',
-          }}
-          PaperProps={{
-            sx: {
-              mt: 1,
-              minWidth: 200,
-              borderRadius: 2,
-              boxShadow: '0 4px 20px rgba(0,0,0,0.15)'
-            }
-          }}
-        >
-          <MenuItem disabled>
-            <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-start' }}>
-              <Typography variant="subtitle2" sx={{ fontWeight: 600 }}>
-                {user?.displayName || 'User'}
-              </Typography>
-              <Typography variant="caption" color="text.secondary">
-                {user?.email}
-              </Typography>
-            </Box>
-          </MenuItem>
-          <MenuItem onClick={handleSignOut} sx={{ color: '#d32f2f' }}>
-            Sign Out
-          </MenuItem>
-        </Menu>
-      </Box>
-
-      {/* Pause Icon */}
+      {/* Meditation Icon */}
       <Box sx={{ position: 'relative', display: 'flex', alignItems: 'center', height: '100%' }}>
         <IconButton
           onClick={() => navigate('/meditation')}

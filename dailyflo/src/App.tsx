@@ -3,12 +3,14 @@ import { CssBaseline, Box, Fab } from '@mui/material'
 import { LocalizationProvider } from '@mui/x-date-pickers'
 import { AdapterDateFns } from '@mui/x-date-pickers/AdapterDateFns'
 import { BrowserRouter as Router, Routes, Route, useNavigate, useLocation } from 'react-router-dom'
+import { AuthProvider } from './contexts/AuthContext'
 import Navbar from './components/Navbar'
 import CycleCalendar from './pages/CycleCalendar'
 import Journal from './pages/Journal'
 import Meditation from './pages/Meditation'
 import PartnerView from './pages/PartnerView'
 import NewJournalEntry from './pages/NewJournalEntry'
+import Profile from './pages/Profile'
 
 const theme = createTheme({
   palette: {
@@ -113,6 +115,7 @@ const AppContent = () => {
             <Route path="/journal/new" element={<NewJournalEntry />} />
             <Route path="/meditation" element={<Meditation />} />
             <Route path="/partner" element={<PartnerView />} />
+            <Route path="/profile" element={<Profile />} />
           </Routes>
         </Box>
 
@@ -156,14 +159,16 @@ const AppContent = () => {
 
 function App() {
   return (
-    <ThemeProvider theme={theme}>
-      <CssBaseline />
-      <LocalizationProvider dateAdapter={AdapterDateFns}>
-        <Router basename="/dailyflo">
-          <AppContent />
-        </Router>
-      </LocalizationProvider>
-    </ThemeProvider>
+    <AuthProvider>
+      <ThemeProvider theme={theme}>
+        <CssBaseline />
+        <LocalizationProvider dateAdapter={AdapterDateFns}>
+          <Router>
+            <AppContent />
+          </Router>
+        </LocalizationProvider>
+      </ThemeProvider>
+    </AuthProvider>
   )
 }
 
