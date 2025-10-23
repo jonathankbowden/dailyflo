@@ -27,7 +27,7 @@ async function deploy() {
     // Connect to FTP server
     console.log('📡 Connecting to FTP server...');
     await client.access({
-      host: 'ftp.kreathaus.com',
+      host: 'kreathaus.com',
       user: 'jbowden@kreathaus.com',
       password: password,
       secure: false, // Set to true if using FTPS
