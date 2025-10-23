@@ -2,6 +2,8 @@
 
 A beautiful React + TypeScript app for cycle tracking, journaling, meditation, and partner sharing.
 
+🌐 **Live at:** https://kreathaus.com/dailyflo/
+
 ## Features
 
 - 📅 **Cycle Calendar** - Track your menstrual cycle with beautiful visualizations
