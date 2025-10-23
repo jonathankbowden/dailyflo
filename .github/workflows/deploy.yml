@@ -38,6 +38,7 @@ jobs:
         uses: SamKirkland/FTP-Deploy-Action@v4.3.5
         with:
           server: ftp.kreathaus.com
+          port: 21
           username: jbowden@kreathaus.com
           password: ${{ secrets.FTP_PASSWORD }}
           local-dir: ./dist/
