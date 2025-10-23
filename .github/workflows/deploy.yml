@@ -37,12 +37,12 @@ jobs:
       - name: Deploy to FTP
         uses: SamKirkland/FTP-Deploy-Action@v4.3.5
         with:
-          server: kreathaus.com
+          server: ftp.kreathaus.com
           username: jbowden@kreathaus.com
           password: ${{ secrets.FTP_PASSWORD }}
           local-dir: ./dist/
           server-dir: /public_html/dailyflo/
-          dangerous-clean-slate: true
+          log-level: verbose
 
       - name: Deployment complete
         run: |
