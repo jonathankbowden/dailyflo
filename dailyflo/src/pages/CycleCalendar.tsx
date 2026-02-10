@@ -1,4 +1,5 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
+import { useNavigate } from 'react-router-dom'
 import {
   Box,
   Typography,
@@ -7,9 +8,10 @@ import {
   DialogContent,
   DialogActions,
   Button,
-  IconButton
+  IconButton,
+  CircularProgress
 } from '@mui/material'
-import { CalendarToday, Close, Check } from '@mui/icons-material'
+import { CalendarToday, Close, Check, FitnessCenter, Insights as InsightsIcon } from '@mui/icons-material'
 import { DatePicker } from '@mui/x-date-pickers'
 import {
   format,
@@ -23,6 +25,8 @@ import {
   isToday,
   isPast
 } from 'date-fns'
+import { useAuth } from '../contexts/AuthContext'
+import { cycleService } from '../services/firestore'
 
 interface CyclePhase {
   name: string
@@ -79,11 +83,42 @@ const cyclePhases: { [key: string]: CyclePhase } = {
 }
 
 const CycleCalendar = () => {
+  const navigate = useNavigate()
+  const { user } = useAuth()
   const [lastPeriod, setLastPeriod] = useState<Date>(new Date(2025, 0, 1)) // Jan 1, 2025
+  const [cycleLength, setCycleLength] = useState<number>(28)
+  const [periodLength, setPeriodLength] = useState<number>(5)
   const [selectedPhase, setSelectedPhase] = useState<string | null>(null)
   const [dialogOpen, setDialogOpen] = useState(false)
   const [logCycleOpen, setLogCycleOpen] = useState(false)
   const [selectedDate, setSelectedDate] = useState<Date>(new Date())
+  const [loading, setLoading] = useState(true)
+  const [saving, setSaving] = useState(false)
+
+  // Load cycle data from Firestore
+  useEffect(() => {
+    const loadCycleData = async () => {
+      if (!user) {
+        setLoading(false)
+        return
+      }
+
+      try {
+        const latestCycle = await cycleService.getLatest(user.uid)
+        if (latestCycle) {
+          setLastPeriod(latestCycle.startDate)
+          setCycleLength(latestCycle.cycleLength || 28)
+          setPeriodLength(latestCycle.periodLength || 5)
+        }
+      } catch (err) {
+        console.error('Error loading cycle data:', err)
+      } finally {
+        setLoading(false)
+      }
+    }
+
+    loadCycleData()
+  }, [user])
 
   const getCurrentPhase = (dayInCycle: number): string => {
     if (dayInCycle >= 1 && dayInCycle <= 5) return 'menstrual'
@@ -111,9 +146,27 @@ const CycleCalendar = () => {
     setDialogOpen(true)
   }
 
-  const handleLogCycle = () => {
-    setLastPeriod(selectedDate)
-    setLogCycleOpen(false)
+  const handleLogCycle = async () => {
+    if (!user) {
+      setLogCycleOpen(false)
+      return
+    }
+
+    setSaving(true)
+    try {
+      await cycleService.logPeriod({
+        userId: user.uid,
+        startDate: selectedDate,
+        cycleLength,
+        periodLength
+      })
+      setLastPeriod(selectedDate)
+    } catch (err) {
+      console.error('Error saving cycle data:', err)
+    } finally {
+      setSaving(false)
+      setLogCycleOpen(false)
+    }
   }
 
   // Export function to be called from App
@@ -212,7 +265,7 @@ const CycleCalendar = () => {
           </Box>
 
           <Typography variant="h1" sx={{ fontSize: '2.25rem', fontWeight: 400, mb: 2, fontFamily: '"Playfair Display", serif', textAlign: 'left' }}>
-            Hello, Brittany!
+            Hello, {user?.displayName?.split(' ')[0] || 'there'}!
           </Typography>
 
           <Typography variant="h6" sx={{ textTransform: 'uppercase', letterSpacing: 1.5, fontSize: '0.75rem', fontWeight: 700, mb: 0, fontFamily: 'system-ui, sans-serif', textAlign: 'left' }}>
@@ -221,6 +274,54 @@ const CycleCalendar = () => {
           <Typography variant="body1" sx={{ mb: 2, color: '#666', fontSize: '0.95rem', fontFamily: 'Inter, system-ui, sans-serif', textAlign: 'left' }}>
             Next Period: {getNextPeriodDate()}
           </Typography>
+
+          {/* Quick Actions */}
+          <Box sx={{ display: 'flex', gap: 1 }}>
+            <Button
+              onClick={() => navigate('/symptoms')}
+              startIcon={<FitnessCenter sx={{ fontSize: 18 }} />}
+              sx={{
+                px: 2,
+                py: 0.75,
+                borderRadius: '20px',
+                border: '1.5px solid #E0E0E0',
+                backgroundColor: 'white',
+                color: '#333',
+                textTransform: 'none',
+                fontFamily: 'Inter, system-ui, sans-serif',
+                fontWeight: 600,
+                fontSize: '0.8rem',
+                '&:hover': {
+                  backgroundColor: '#f5f5f5',
+                  borderColor: '#71A697'
+                }
+              }}
+            >
+              Log Symptoms
+            </Button>
+            <Button
+              onClick={() => navigate('/insights')}
+              startIcon={<InsightsIcon sx={{ fontSize: 18 }} />}
+              sx={{
+                px: 2,
+                py: 0.75,
+                borderRadius: '20px',
+                border: '1.5px solid #E0E0E0',
+                backgroundColor: 'white',
+                color: '#333',
+                textTransform: 'none',
+                fontFamily: 'Inter, system-ui, sans-serif',
+                fontWeight: 600,
+                fontSize: '0.8rem',
+                '&:hover': {
+                  backgroundColor: '#f5f5f5',
+                  borderColor: '#71A697'
+                }
+              }}
+            >
+              Insights
+            </Button>
+          </Box>
         </Box>
 
         {/* Day Headers with full-width lines */}
@@ -502,7 +603,8 @@ const CycleCalendar = () => {
           <Button
             onClick={handleLogCycle}
             variant="outlined"
-            startIcon={<Check />}
+            disabled={saving}
+            startIcon={saving ? <CircularProgress size={20} /> : <Check />}
             sx={{
               borderColor: '#000',
               color: '#000',
@@ -515,10 +617,14 @@ const CycleCalendar = () => {
               '&:hover': {
                 borderColor: '#000',
                 backgroundColor: 'rgba(0,0,0,0.04)'
+              },
+              '&:disabled': {
+                borderColor: '#ccc',
+                color: '#999'
               }
             }}
           >
-            LOG CYCLE
+            {saving ? 'SAVING...' : 'LOG CYCLE'}
           </Button>
         </Box>
       </Dialog>

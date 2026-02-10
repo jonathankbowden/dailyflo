@@ -11,6 +11,8 @@ import Meditation from './pages/Meditation'
 import PartnerView from './pages/PartnerView'
 import NewJournalEntry from './pages/NewJournalEntry'
 import Profile from './pages/Profile'
+import SymptomTracker from './pages/SymptomTracker'
+import Insights from './pages/Insights'
 
 const theme = createTheme({
   palette: {
@@ -60,7 +62,7 @@ const AppContent = () => {
     }
   }
 
-  const hideNavbar = location.pathname === '/journal/new'
+  const hideNavbar = location.pathname === '/journal/new' || location.pathname === '/symptoms'
 
   return (
     <Box
@@ -116,6 +118,8 @@ const AppContent = () => {
             <Route path="/meditation" element={<Meditation />} />
             <Route path="/partner" element={<PartnerView />} />
             <Route path="/profile" element={<Profile />} />
+            <Route path="/symptoms" element={<SymptomTracker />} />
+            <Route path="/insights" element={<Insights />} />
           </Routes>
         </Box>
 

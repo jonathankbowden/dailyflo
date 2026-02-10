@@ -1,18 +1,23 @@
 import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { Box, TextField, Button, IconButton } from '@mui/material'
+import { Box, TextField, Button, IconButton, Snackbar, Alert, CircularProgress } from '@mui/material'
 import { ArrowBack, Edit } from '@mui/icons-material'
-import { format } from 'date-fns'
+import { format, parse } from 'date-fns'
+import { useAuth } from '../contexts/AuthContext'
+import { journalService } from '../services/firestore'
 
 const emotions = ['Hurt', 'Sad', 'Lonely', 'Angry', 'Fear', 'Shame', 'Guilt', 'Glad', 'Love']
 
 const NewJournalEntry = () => {
   const navigate = useNavigate()
+  const { user } = useAuth()
   const [title, setTitle] = useState('')
   const [content, setContent] = useState('')
   const [date, setDate] = useState(format(new Date(), 'MMMM d, yyyy'))
   const [isEditingDate, setIsEditingDate] = useState(false)
   const [selectedEmotions, setSelectedEmotions] = useState<string[]>([])
+  const [saving, setSaving] = useState(false)
+  const [error, setError] = useState<string | null>(null)
 
   const handleEmotionToggle = (emotion: string) => {
     setSelectedEmotions(prev =>
@@ -22,10 +27,35 @@ const NewJournalEntry = () => {
     )
   }
 
-  const handleSaveEntry = () => {
+  const handleSaveEntry = async () => {
+    if (!user) {
+      setError('Please sign in to save journal entries')
+      return
+    }
+
     if (title.trim() || content.trim() || selectedEmotions.length > 0) {
-      // TODO: Save entry to state management or backend
-      navigate('/journal')
+      setSaving(true)
+      setError(null)
+
+      try {
+        const entryDate = parse(date, 'MMMM d, yyyy', new Date())
+
+        await journalService.create({
+          userId: user.uid,
+          title: title.trim() || 'Untitled Entry',
+          content: content.trim(),
+          date: entryDate,
+          emotions: selectedEmotions,
+          imageUrl: 'https://images.unsplash.com/photo-1506905925346-21bda4d32df4?w=800&auto=format&fit=crop'
+        })
+
+        navigate('/journal')
+      } catch (err) {
+        console.error('Error saving journal entry:', err)
+        setError('Failed to save entry. Please try again.')
+      } finally {
+        setSaving(false)
+      }
     }
   }
 
@@ -378,9 +408,10 @@ const NewJournalEntry = () => {
           </Box>
         </Button>
 
-        {/* Share Button */}
+        {/* Save Button */}
         <Button
           onClick={handleSaveEntry}
+          disabled={saving}
           sx={{
             minWidth: 140,
             height: 55,
@@ -390,47 +421,67 @@ const NewJournalEntry = () => {
             textTransform: 'none',
             '&:hover': {
               background: '#f8f8f8'
+            },
+            '&:disabled': {
+              background: '#f0f0f0',
+              borderColor: '#ccc'
             }
           }}
         >
-          <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.2 }}>
-            <Box sx={{
-              width: 18,
-              height: 18,
-              position: 'relative',
-              display: 'flex',
-              alignItems: 'flex-end',
-              justifyContent: 'center'
-            }}>
+          {saving ? (
+            <CircularProgress size={24} sx={{ color: '#365C62' }} />
+          ) : (
+            <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.2 }}>
               <Box sx={{
-                width: 14,
-                height: 9,
-                border: '2px solid #365C62',
-                borderTop: 'none',
-                borderRadius: '0 0 3px 3px'
-              }} />
+                width: 18,
+                height: 18,
+                position: 'relative',
+                display: 'flex',
+                alignItems: 'flex-end',
+                justifyContent: 'center'
+              }}>
+                <Box sx={{
+                  width: 14,
+                  height: 9,
+                  border: '2px solid #365C62',
+                  borderTop: 'none',
+                  borderRadius: '0 0 3px 3px'
+                }} />
+                <Box sx={{
+                  width: 7,
+                  height: 11,
+                  border: '2px solid #365C62',
+                  borderBottom: 'none',
+                  position: 'absolute',
+                  top: 0,
+                  borderRadius: '3px 3px 0 0'
+                }} />
+              </Box>
               <Box sx={{
-                width: 7,
-                height: 11,
-                border: '2px solid #365C62',
-                borderBottom: 'none',
-                position: 'absolute',
-                top: 0,
-                borderRadius: '3px 3px 0 0'
-              }} />
+                color: 'black',
+                fontSize: 14,
+                fontFamily: 'Inter',
+                fontWeight: 700,
+                letterSpacing: '0.3px'
+              }}>
+                SAVE
+              </Box>
             </Box>
-            <Box sx={{
-              color: 'black',
-              fontSize: 14,
-              fontFamily: 'Inter',
-              fontWeight: 700,
-              letterSpacing: '0.3px'
-            }}>
-              SHARE
-            </Box>
-          </Box>
+          )}
         </Button>
       </Box>
+
+      {/* Error Snackbar */}
+      <Snackbar
+        open={!!error}
+        autoHideDuration={4000}
+        onClose={() => setError(null)}
+        anchorOrigin={{ vertical: 'bottom', horizontal: 'center' }}
+      >
+        <Alert onClose={() => setError(null)} severity="error" sx={{ width: '100%' }}>
+          {error}
+        </Alert>
+      </Snackbar>
     </Box>
   )
 }

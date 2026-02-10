@@ -1,71 +1,52 @@
-import { useState } from 'react'
-import { Box, TextField, IconButton, Typography } from '@mui/material'
+import { useState, useEffect, useMemo } from 'react'
+import { useNavigate } from 'react-router-dom'
+import { Box, TextField, IconButton, Typography, CircularProgress, Chip } from '@mui/material'
 import { Search, Edit } from '@mui/icons-material'
+import { format } from 'date-fns'
 import journalIcon from '../assets/journal.svg'
-
-interface JournalEntry {
-  id: string
-  title: string
-  date: string
-  image?: string
-  hasImage: boolean
-}
-
-// Mock data matching Figma design
-const mockEntries: JournalEntry[] = [
-  {
-    id: '1',
-    title: 'TITLE W/ PHOTO',
-    date: 'Janurary 14, 2023',
-    image: 'https://images.unsplash.com/photo-1506905925346-21bda4d32df4?w=800&auto=format&fit=crop',
-    hasImage: true
-  },
-  {
-    id: '2',
-    title: 'TITLE W/ NO PHOTO ENTERED',
-    date: 'Janurary 14, 2023',
-    image: 'https://images.unsplash.com/photo-1518509562904-e7ef99cdcc86?w=800&auto=format&fit=crop',
-    hasImage: true
-  },
-  {
-    id: '3',
-    title: 'TITLE W/ NO PHOTO ENTERED',
-    date: 'Janurary 14, 2023',
-    image: 'https://images.unsplash.com/photo-1511593358241-7eea1f3c84e5?w=800&auto=format&fit=crop',
-    hasImage: true
-  },
-  {
-    id: '4',
-    title: 'TITLE W/ NO PHOTO ENTERED',
-    date: 'Janurary 14, 2023',
-    image: 'https://images.unsplash.com/photo-1519681393784-d120267933ba?w=800&auto=format&fit=crop',
-    hasImage: true
-  },
-  {
-    id: '5',
-    title: 'TITLE W/ NO PHOTO ENTERED',
-    date: 'Janurary 14, 2023',
-    image: 'https://images.unsplash.com/photo-1470071459604-3b5ec3a7fe05?w=800&auto=format&fit=crop',
-    hasImage: true
-  },
-  {
-    id: '6',
-    title: 'TITLE W/ NO PHOTO ENTERED',
-    date: 'Janurary 14, 2023',
-    image: 'https://images.unsplash.com/photo-1472214103451-9374bd1c798e?w=800&auto=format&fit=crop',
-    hasImage: true
-  },
-  {
-    id: '7',
-    title: 'TITLE W/ PHOTO',
-    date: 'Janurary 14, 2023',
-    image: 'https://images.unsplash.com/photo-1501594907352-04cda38ebc29?w=800&auto=format&fit=crop',
-    hasImage: true
-  }
-]
+import { useAuth } from '../contexts/AuthContext'
+import { journalService, type JournalEntry as JournalEntryType } from '../services/firestore'
 
 const Journal = () => {
+  const navigate = useNavigate()
+  const { user } = useAuth()
   const [searchQuery, setSearchQuery] = useState('')
+  const [entries, setEntries] = useState<JournalEntryType[]>([])
+  const [loading, setLoading] = useState(true)
+  const [error, setError] = useState<string | null>(null)
+
+  useEffect(() => {
+    const loadEntries = async () => {
+      if (!user) {
+        setLoading(false)
+        return
+      }
+
+      try {
+        const userEntries = await journalService.getByUser(user.uid)
+        setEntries(userEntries)
+      } catch (err) {
+        console.error('Error loading journal entries:', err)
+        setError('Failed to load entries')
+      } finally {
+        setLoading(false)
+      }
+    }
+
+    loadEntries()
+  }, [user])
+
+  const filteredEntries = useMemo(() => {
+    if (!searchQuery.trim()) return entries
+
+    const lowerSearch = searchQuery.toLowerCase()
+    return entries.filter(
+      entry =>
+        entry.title.toLowerCase().includes(lowerSearch) ||
+        entry.content.toLowerCase().includes(lowerSearch) ||
+        entry.emotions.some(e => e.toLowerCase().includes(lowerSearch))
+    )
+  }, [entries, searchQuery])
 
   return (
     <Box sx={{
@@ -90,7 +71,7 @@ const Journal = () => {
           </Typography>
         </Box>
 
-        {/* Hello, Brittany! */}
+        {/* Hello, User! */}
         <Box sx={{ px: '24px' }}>
           <Typography variant="h1" sx={{
             fontSize: '2.25rem',
@@ -99,7 +80,7 @@ const Journal = () => {
             fontFamily: '"Playfair Display", serif',
             textAlign: 'left'
           }}>
-            Hello, Brittany!
+            Hello, {user?.displayName?.split(' ')[0] || 'there'}!
           </Typography>
         </Box>
 
@@ -189,9 +170,48 @@ const Journal = () => {
         flexDirection: 'column',
         gap: '32px'
       }}>
-        {mockEntries.map((entry) => (
+        {/* Loading State */}
+        {loading && (
+          <Box sx={{ display: 'flex', justifyContent: 'center', py: 4 }}>
+            <CircularProgress sx={{ color: '#71A697' }} />
+          </Box>
+        )}
+
+        {/* Error State */}
+        {error && !loading && (
+          <Box sx={{ textAlign: 'center', py: 4, color: '#666' }}>
+            <Typography>{error}</Typography>
+          </Box>
+        )}
+
+        {/* Empty State */}
+        {!loading && !error && filteredEntries.length === 0 && (
+          <Box sx={{ textAlign: 'center', py: 4 }}>
+            <Typography sx={{
+              fontFamily: 'Playfair Display, serif',
+              fontSize: '1.25rem',
+              color: '#666',
+              mb: 2
+            }}>
+              {searchQuery ? 'No entries found' : 'No journal entries yet'}
+            </Typography>
+            {!searchQuery && (
+              <Typography sx={{
+                fontFamily: 'Inter, system-ui, sans-serif',
+                fontSize: '0.9rem',
+                color: '#999'
+              }}>
+                Tap the + button to create your first entry
+              </Typography>
+            )}
+          </Box>
+        )}
+
+        {/* Entries */}
+        {!loading && filteredEntries.map((entry) => (
           <Box
             key={entry.id}
+            onClick={() => navigate(`/journal/${entry.id}`)}
             sx={{
               width: '100%',
               background: 'white',
@@ -211,7 +231,7 @@ const Journal = () => {
               height: 218,
               position: 'relative',
               overflow: 'visible',
-              backgroundImage: `url(${entry.image})`,
+              backgroundImage: `url(${entry.imageUrl || 'https://images.unsplash.com/photo-1506905925346-21bda4d32df4?w=800&auto=format&fit=crop'})`,
               backgroundSize: 'cover',
               backgroundPosition: 'center',
               display: 'flex',
@@ -229,19 +249,25 @@ const Journal = () => {
               }
             }}>
               {/* Edit Icon */}
-              <IconButton sx={{
-                width: 36,
-                height: 36,
-                background: 'white',
-                borderRadius: '50%',
-                zIndex: 1,
-                position: 'absolute',
-                bottom: -18,
-                right: 16,
-                '&:hover': {
-                  background: '#f5f5f5'
-                }
-              }}>
+              <IconButton
+                onClick={(e) => {
+                  e.stopPropagation()
+                  navigate(`/journal/edit/${entry.id}`)
+                }}
+                sx={{
+                  width: 36,
+                  height: 36,
+                  background: 'white',
+                  borderRadius: '50%',
+                  zIndex: 1,
+                  position: 'absolute',
+                  bottom: -18,
+                  right: 16,
+                  '&:hover': {
+                    background: '#f5f5f5'
+                  }
+                }}
+              >
                 <Edit sx={{ fontSize: 18, color: '#507479' }} />
               </IconButton>
             </Box>
@@ -260,8 +286,38 @@ const Journal = () => {
                 fontWeight: 700,
                 mb: '8px'
               }}>
-                {entry.title}
+                {entry.title.toUpperCase()}
               </Box>
+
+              {/* Emotions */}
+              {entry.emotions.length > 0 && (
+                <Box sx={{ display: 'flex', gap: 0.5, flexWrap: 'wrap', mb: 1 }}>
+                  {entry.emotions.slice(0, 3).map((emotion) => (
+                    <Chip
+                      key={emotion}
+                      label={emotion}
+                      size="small"
+                      sx={{
+                        backgroundColor: '#C0D5CF',
+                        fontSize: '0.7rem',
+                        height: 22,
+                        fontFamily: 'Inter, system-ui, sans-serif'
+                      }}
+                    />
+                  ))}
+                  {entry.emotions.length > 3 && (
+                    <Chip
+                      label={`+${entry.emotions.length - 3}`}
+                      size="small"
+                      sx={{
+                        backgroundColor: '#E8E8E8',
+                        fontSize: '0.7rem',
+                        height: 22
+                      }}
+                    />
+                  )}
+                </Box>
+              )}
 
               {/* Date Posted */}
               <Box sx={{
@@ -279,7 +335,7 @@ const Journal = () => {
                 fontFamily: 'Inter, system-ui, sans-serif',
                 fontWeight: 400
               }}>
-                {entry.date}
+                {format(entry.date, 'MMMM d, yyyy')}
               </Box>
             </Box>
           </Box>
